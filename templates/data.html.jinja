@@ -1,0 +1,121 @@
+<!-- home.html -->
+{% extends 'layout/app_layout.html.jinja' %}
+
+{% block title %}Data{% endblock %}
+
+{% block content %}
+<div class="row page-titles">
+    <div class="col-md-5 align-self-center">
+        <h4 class="text-themecolor">Data</h4>
+    </div>
+    {# <div class="col-md-7 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                <li class="breadcrumb-item active">Chats</li>
+            </ol>
+            <button type="button" class="btn btn-info d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Create
+                New</button>
+        </div>
+    </div> #}
+</div>
+<h1 class="text-center">STATISTIK DATA</h1>
+<p class="lead text-center">Halaman Data Olahan Historis.</p>
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Data jasa service</h4>
+            <h6 class="card-subtitle">data yang ada pada sebelumnya</h6>
+            <div class="table-responsive">
+                <table class="table" id="myTable">
+                    <thead>
+                        <tr>
+                            <th>tanggal</th>
+                            <th>nama</th>
+                            <th>brand laptop</th>
+                            <th>service / kendala</th>
+                            <th>keterangan</th>
+                            <th>anggaran</th>
+                            <th>estimasi selesai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in data %}
+                        <tr>
+                            <td>{{ item['Tanggal'] }}</td>
+                            <td>{{ item['Nama Konsumen'] }}</td>
+                            <td>{{ item['Brand Laptop'] }}</td>
+                            <td>{{ item['Service/Kendala'] }}</td>
+                            <td>{{ item['Keterangan'] }}</td>
+                            <td>{{ item['Anggaran Biaya'] }}</td>
+                            <td>{{ item['Estimasi Selesai'] }}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Chart data kebutuhan sparepart</h4>
+            <div>
+                <canvas id="chart_data" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable();
+
+        fetchDataAndRenderChart();
+
+
+    });
+    $('#myTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]
+    });
+
+    async function fetchDataAndRenderChart() {
+        const apiUrl = "{{url_for('chart')}}";
+
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+
+            // Assuming the data returned has 'labels' and 'sales' arrays
+            const chartData = data;
+
+            // Now create the chart
+            var ctx = document.getElementById("chart_data").getContext("2d");
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+</script>
+{% endblock javascript %}
